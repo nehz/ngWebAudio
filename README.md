@@ -1,12 +1,13 @@
 #ngWebAudio
-`ngWebAudio` is an AngularJS module to play audio using the WebAudio API with
-HTML5 Audio fallback.
+`ngWebAudio` is an AngularJS module for playing audio using the WebAudio API.
 
-One motivation for using WebAudio API is that you can buffer audio on page load
+HTML5 Audio is used if WebAudio is unavailable.
+
+One motivation for using WebAudio is that you can buffer audio on page load
 for mobile browsers. Currently most mobile browsers will not pre-buffer HTML5
-audio elements unless it is interacted with, and will ignore XHR caches.
-Using WebAudio, we can fetch and cache audio via XHR, and play it back using
-the WebAudio API.
+audio elements unless it is interacted with, and will also ignore XHR caches.
+The work-around is to fetch and cache audio via XHR, and play it back using
+the WebAudio.
 
 
 #Usage
@@ -38,6 +39,8 @@ audio.pause();
 // Options for audio object
 audio.options
 ```
+
+See `demo/demo.html` for an example.
 
 ### Options
 ```
