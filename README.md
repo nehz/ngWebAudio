@@ -3,8 +3,8 @@
 
 HTML5 Audio is used if WebAudio is unavailable.
 
-One motivation for using WebAudio is that you can buffer audio on page load
-for mobile browsers. Currently most mobile browsers will not pre-buffer HTML5
+One motivation for using WebAudio is that you can **buffer audio on page load
+for mobile browsers**. Currently most mobile browsers will not pre-buffer HTML5
 audio elements unless it is interacted with, and will also ignore XHR caches.
 The work-around is to fetch and cache audio via XHR, and play it back using
 the WebAudio.
@@ -55,7 +55,7 @@ options = {
 
 ##Installation
 ```
-bower install ngWebAudio
+bower install ng-webaudio
 ```
 
 ##Testing
