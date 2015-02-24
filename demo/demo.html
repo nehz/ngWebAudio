@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <body ng-app="app" ng-controller="play">
+    <button ng-click="buffer()">Buffer</button>
+    <button ng-click="play()">Play</button>
+    <button ng-click="pause()">Pause</button>
+    <button ng-click="stop()">Stop</button>
+
+    <script src="..\bower_components\angular\angular.js"></script>
+    <script src="..\src\ngWebAudio.js"></script>
+
+    <script>
+      angular.module('app', ['ngWebAudio'])
+        .controller('play', function($scope, WebAudio) {
+          var audio = WebAudio('../tests/test.mp3', {buffer: false});
+
+          $scope.buffer = function() {
+            audio.buffer();
+          }
+          $scope.play = function() {
+            audio.play();
+          }
+          $scope.pause = function() {
+            audio.pause();
+          }
+          $scope.stop = function() {
+            audio.stop();
+          }
+        })
+    </script>
+  </body>
+</html>
