@@ -52,11 +52,19 @@ options = {
 }
 ```
 
+### Events
+```
+audio.onPlay = function() { ... }   // When media first starts playing
+audio.onEnd = function() { ... }    // When media stops playing
+```
+Callbacks are attached to the `audio` objected that is returned.
+
 
 ##Installation
 ```
 bower install ng-webaudio
 ```
+
 
 ##Testing
 ```
@@ -65,6 +73,7 @@ npm install
 bower install
 karma test
 ```
+
 
 ##License
 MIT licensed. See LICENSE for details.
