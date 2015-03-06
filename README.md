@@ -57,7 +57,7 @@ options = {
 audio.onPlay = function() { ... }   // When media first starts playing
 audio.onEnd = function() { ... }    // When media stops playing
 ```
-Callbacks are attached to the `audio` objected that is returned.
+Callbacks are attached to the `audio` object that is returned.
 
 
 ##Installation
