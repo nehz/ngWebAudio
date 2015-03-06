@@ -8,7 +8,7 @@ angular.module('ngWebAudio', [])
     audioBuffers = {};
 
   // Buffer audio via XHR
-  function bufferAudio(src, retryInterval) {
+  function bufferAudio(src, retryInterval, cb) {
     if (audioBuffers[src]) return;
     retryInterval = retryInterval || 1000;
     audioBuffers[src] = LOADING;
@@ -26,6 +26,10 @@ angular.module('ngWebAudio', [])
 
       audioCtx.decodeAudioData(req.response, function(buffer) {
         audioBuffers[src] = buffer;
+        // Callback
+        if ('function' === typeof cb) {
+          cb();
+        }
       });
     };
 
@@ -33,14 +37,14 @@ angular.module('ngWebAudio', [])
     req.onerror = function() {
       console.error('Retrying ', src);
       audioBuffers[src] = null;
-      setTimeout(function() { bufferAudio(src, retryInterval); }, retryInterval);
+      setTimeout(function() { bufferAudio(src, retryInterval, cb); }, retryInterval);
     };
 
     req.send();
   }
 
   // Create WebAudio source
-  function createWebAudio(src, options) {
+  function createWebAudio(src, options, cb) {
     var playStartTime = 0;  // Used to keep track how long clip is played for
     var playOffset = 0;  // Used to keep track of how far into clip we are
 
@@ -53,7 +57,7 @@ angular.module('ngWebAudio', [])
 
         // Buffer audio if not buffered, and schedule play() for later
         if (!audioBuffers[src] || audioBuffers[src] === LOADING) {
-          bufferAudio(src, options.retryInterval);
+          bufferAudio(src, options.retryInterval, cb);
           (function retry() {
             if (audioBuffers[src] && audioBuffers[src] !== LOADING && !self.stopped) {
               self.stopped = true;
@@ -190,14 +194,14 @@ angular.module('ngWebAudio', [])
     return self;
   }
 
-  return function(src, options) {
+  return function(src, options, cb) {
     options = options || {};
     if (options.gain === undefined) options.gain = 1;
 
     if (!audioBuffers[src] && options.buffer !== false) {
-      bufferAudio(src, options.retryInterval);
+      bufferAudio(src, options.retryInterval, cb);
     }
-    if (audioCtx) return createWebAudio(src, options);
+    if (audioCtx) return createWebAudio(src, options, cb);
     else return createHTMLAudio(src, options);
   };
 });
