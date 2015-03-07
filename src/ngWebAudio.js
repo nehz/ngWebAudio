@@ -1,6 +1,13 @@
 angular.module('ngWebAudio', [])
 
-.factory('WebAudio', function() {
+.factory('DeferredApply', ['$timeout', function($timeout) {
+  return function(f, delay) {
+    $timeout(f, delay || 0);
+    if ($timeout.flush) $timeout.flush();
+  };
+}])
+
+.factory('WebAudio', ['DeferredApply', function(DeferredApply) {
   var LOADING = 1;
 
   if (!window.AudioContext) window.AudioContext = window.webkitAudioContext;
@@ -73,14 +80,14 @@ angular.module('ngWebAudio', [])
         audioSrc.loop = !!options.loop;
         audioSrc.onended = function() {
           self.stopped = true;
-          if (self.onEnd) self.onEnd();
+          if (self.onEnd) DeferredApply(self.onEnd);
         };
 
         if (audioSrc.start) audioSrc.start(0, playOffset);
         else if(audioSrc.noteOn) audioSrc.noteOn(0, playOffset);
         else console.error('AudioContextBuffer.start() not available');
 
-        if (self.onPlay) self.onPlay();
+        if (self.onPlay) DeferredApply(self.onPlay);
         playStartTime = audioCtx.currentTime;
       },
 
@@ -154,7 +161,7 @@ angular.module('ngWebAudio', [])
         audioSrc.pause();
         if (!pause) {
           audioSrc.currentTime = 0;
-          if (self.onEnd) self.onEnd();
+          if (self.onEnd) DeferredApply(self.onEnd);
         }
       },
 
@@ -177,11 +184,11 @@ angular.module('ngWebAudio', [])
       self.audioSrc.currentTime = 0;
       if (!options.loop) {
         audioSrc.pause();
-        if (self.onEnd) self.onEnd();
+        if (self.onEnd) DeferredApply(self.onEnd);
       }
     });
     audioSrc.addEventListener('play', function() {
-      if (self.onPlay) self.onPlay();
+      if (self.onPlay) DeferredApply(self.onPlay);
     });
     audioSrc.addEventListener('loadeddata', function() {
       self.loaded = true;
@@ -200,4 +207,4 @@ angular.module('ngWebAudio', [])
     if (audioCtx) return createWebAudio(src, options);
     else return createHTMLAudio(src, options);
   };
-});
+}]);
