@@ -10,8 +10,8 @@ angular.module('ngWebAudio', [])
 .factory('WebAudio', ['DeferredApply', function(DeferredApply) {
   var LOADING = 1;
 
-  if (!window.AudioContext) window.AudioContext = window.webkitAudioContext;
-  var audioCtx = window.AudioContext ? new window.AudioContext() : null,
+  var _AudioContext = window.AudioContext || window.webkitAudioContext;
+  var audioCtx = _AudioContext ? new _AudioContext() : null,
     audioBuffers = {};
 
   // Buffer audio via XHR
