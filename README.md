@@ -71,7 +71,7 @@ bower install ng-webaudio
 npm install -g karma-cli
 npm install
 bower install
-karma test
+karma start
 ```
 
 
