@@ -201,10 +201,8 @@ angular.module('ngWebAudio', [])
     options = options || {};
     if (options.gain === undefined) options.gain = 1;
 
-    if (!audioBuffers[src] && options.buffer !== false) {
-      bufferAudio(src, options.retryInterval);
-    }
-    if (audioCtx) return createWebAudio(src, options);
-    else return createHTMLAudio(src, options);
+    var audio = (audioCtx ? createWebAudio : createHTMLAudio)(src, options);
+    if (options.buffer !== false) audio.buffer();
+    return audio;
   };
 }]);
