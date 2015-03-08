@@ -1,3 +1,4 @@
+'use strict';
 angular.module('ngWebAudio', [])
 
 .factory('DeferredApply', ['$timeout', function($timeout) {
@@ -10,8 +11,8 @@ angular.module('ngWebAudio', [])
 .factory('WebAudio', ['DeferredApply', function(DeferredApply) {
   var LOADING = 1;
 
-  var _AudioContext = window.AudioContext || window.webkitAudioContext;
-  var audioCtx = _AudioContext ? new _AudioContext() : null,
+  var AudioContext = window.AudioContext || window.webkitAudioContext;
+  var audioCtx = AudioContext ? new AudioContext() : null,
     audioBuffers = {};
 
   // Buffer audio via XHR
