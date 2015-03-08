@@ -27,11 +27,6 @@ angular.module('ngWebAudio', [])
 
     req.onload = function() {
       if (req.status !== 200 && audioBuffers[src]) return req.onerror();
-
-      // If we're using HTML fallback, we're hoping that our XHR will cause the
-      // browser to cache the content
-      if (!audioCtx) return;
-
       audioCtx.decodeAudioData(req.response, function(buffer) {
         audioBuffers[src] = buffer;
       });
@@ -171,7 +166,7 @@ angular.module('ngWebAudio', [])
       },
 
       buffer: function() {
-        bufferAudio(src, options.retryInterval);
+        audioSrc.load();
       },
 
       offset: function() {
@@ -191,7 +186,7 @@ angular.module('ngWebAudio', [])
     audioSrc.addEventListener('play', function() {
       if (self.onPlay) DeferredApply(self.onPlay);
     });
-    audioSrc.addEventListener('loadeddata', function() {
+    audioSrc.addEventListener('canplaythrough', function() {
       self.loaded = true;
     });
 
