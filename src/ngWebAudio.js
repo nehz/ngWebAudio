@@ -50,6 +50,8 @@ angular.module('ngWebAudio', [])
     var self = {
       stopped: true,
       options: options,
+      isWebAudio: true,
+
       play: function play() {
         if (!self.stopped) return;
         self.stopped = false;
@@ -129,6 +131,8 @@ angular.module('ngWebAudio', [])
       stopped: true,
       options: options,
       loaded: false,
+      isWebAudio: false,
+
       play: function play() {
         if (!self.stopped) return;
         self.stopped = false;

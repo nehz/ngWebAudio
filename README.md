@@ -38,6 +38,9 @@ audio.pause();
 
 // Options for audio object
 audio.options
+
+// Using WebAudio or HTML Audio fallback
+audio.isWebAudio
 ```
 
 See `demo/demo.html` for an example.
