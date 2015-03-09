@@ -17,7 +17,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (!ngWebAudio.audioContext) ngWebAudio.audioContext = new AudioContext();
     var audioCtx = ngWebAudio.audioContext;
   }
-  var audioBuffers = {};
+  var audioBuffers = {}, eventHandlers = {};
 
   // Buffer audio via XHR
   function bufferAudio(src, retryInterval) {
@@ -31,8 +31,22 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
     req.onload = function() {
       if (req.status !== 200 && audioBuffers[src]) return req.onerror();
+
       audioCtx.decodeAudioData(req.response, function(buffer) {
         audioBuffers[src] = buffer;
+
+        // Fire onBuffered event
+        var handlers = eventHandlers[src].buffered;
+        if (handlers) {
+          // We can safely clean up all onBuffered handlers, as once the
+          // src media is cached, the onBuffered event can be fired immediately
+          // for any new audio objects that are created henceforth
+          eventHandlers[src].buffered = null;
+
+          for (var i = 0; i < handlers.length; i++) {
+            DeferredApply(handlers[i]);
+          }
+        }
       });
     };
 
@@ -63,7 +77,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
         // Buffer audio if not buffered, and schedule play() for later
         if (!self.isCached()) {
-          bufferAudio(src, options.retryInterval);
+          self.buffer();
           (function retry() {
             if (self.isCached() && !self.stopped) {
               self.stopped = true;
@@ -115,6 +129,19 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
       buffer: function() {
         bufferAudio(src, options.retryInterval);
+
+        // onBuffered event
+        // We need to wrap this in setTimeout() because buffer() can be
+        // automatically called on creation so the user does not have an
+        // opportunity to set a onBuffer handler
+        setTimeout(function() {
+          if (!self.onBuffered) return;
+          if (self.isCached()) DeferredApply(self.onBuffered);
+          else {
+            if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
+            eventHandlers[src].buffered.push(self.onBuffered);
+          }
+        }, 0);
       },
 
       offset: function() {
@@ -202,12 +229,15 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     });
     audioSrc.addEventListener('canplaythrough', function() {
       self.loaded = true;
+      if (self.onBuffered) DeferredApply(self.onBuffered);
     });
 
     return self;
   }
 
   return function(src, options) {
+    if (!eventHandlers[src]) eventHandlers[src] = {};
+
     options = options || {};
     if (options.gain === undefined) options.gain = 1;
 
