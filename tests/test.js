@@ -1,7 +1,7 @@
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
 function ngWebAudioTest(fallback) {
-  var wa;
+  var WebAudio, wa;
 
   beforeAll(function() {
     if (fallback) {
@@ -11,13 +11,15 @@ function ngWebAudioTest(fallback) {
   });
 
   beforeEach(module('ngWebAudio'));
-  beforeEach(inject(function(WebAudio) {
+  beforeEach(inject(function(_WebAudio_) {
+    WebAudio = _WebAudio_;
     wa = WebAudio('base/tests/test.mp3');
   }));
 
   it('test mode', function() {
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
     if (fallback) expect(wa.audioSrc).toBeDefined();
-    else if (window.AudioContext) expect(wa.audioSrc).toBeUndefined();
+    else if (AudioContext) expect(wa.audioSrc).toBeUndefined();
   });
 
   it('should play audio', function(done) {
@@ -140,6 +142,43 @@ function ngWebAudioTest(fallback) {
       }, 100);
       done();
     };
+  });
+
+  it('should cache', function(done) {
+    // Caching is not handled by us in fallback (HTML Audio)
+    if (!wa.isWebAudio) {
+      done();
+      return;
+    }
+
+    expect(wa.isCached).not.toBeUndefined();
+    expect(wa.isCached()).toBe(false);
+
+    wa.onBuffered = function() {
+      var wa_cached = WebAudio(wa.src);
+
+      expect(wa.isCached()).toBe(true);
+      expect(wa_cached.isCached()).toBe(true);
+
+      wa_cached.onBuffered = function() {
+        expect(wa.isCached()).toBe(true);
+        expect(wa_cached.isCached()).toBe(true);
+        done();
+      };
+    };
+  });
+
+  describe('onBuffered event', function() {
+    it('should fire if not buffered', function(done) {
+      wa.onBuffered = function() { done(); };
+    });
+
+    it('should fire if already buffered', function(done) {
+      wa.onBuffered = function() {
+        var wa_cached = WebAudio(wa.src);
+        wa_cached.onBuffered = function() { done(); };
+      };
+    });
   });
 }
 
