@@ -1,7 +1,7 @@
-'use strict';
 angular.module('ngWebAudio', [])
 
 .factory('DeferredApply', ['$timeout', function($timeout) {
+  'use strict';
   return function(f, delay) {
     $timeout(f, delay || 0);
     if ($timeout.flush) $timeout.flush();
@@ -9,6 +9,7 @@ angular.module('ngWebAudio', [])
 }])
 
 .factory('WebAudio', ['DeferredApply', function(DeferredApply) {
+  'use strict';
   var LOADING = 1;
 
   var AudioContext = window.AudioContext || window.webkitAudioContext;
