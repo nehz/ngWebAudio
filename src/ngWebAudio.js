@@ -53,6 +53,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
     var self = {
       stopped: true,
+      src: src,
       options: options,
       isWebAudio: true,
 
@@ -133,6 +134,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     var self = {
       audioSrc: audioSrc,
       stopped: true,
+      src: src,
       options: options,
       loaded: false,
       isWebAudio: false,
