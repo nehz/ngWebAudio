@@ -118,7 +118,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       },
 
       offset: function() {
-        return self.stopped ?
+        return self.stopped || !self.isCached() ?
           playOffset :
           playOffset + audioCtx.currentTime - playStartTime;
       },
