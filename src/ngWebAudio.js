@@ -62,10 +62,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         self.stopped = false;
 
         // Buffer audio if not buffered, and schedule play() for later
-        if (!audioBuffers[src] || audioBuffers[src] === LOADING) {
+        if (!self.isCached()) {
           bufferAudio(src, options.retryInterval);
           (function retry() {
-            if (audioBuffers[src] && audioBuffers[src] !== LOADING && !self.stopped) {
+            if (self.isCached() && !self.stopped) {
               self.stopped = true;
               play(src);
             }
@@ -121,6 +121,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         return self.stopped ?
           playOffset :
           playOffset + audioCtx.currentTime - playStartTime;
+      },
+
+      isCached: function() {
+        return audioBuffers[src] && audioBuffers[src] !== LOADING;
       }
     };
 
