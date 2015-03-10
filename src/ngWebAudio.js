@@ -3,6 +3,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 .factory('deferredApply', ['$timeout', function($timeout) {
   'use strict';
   return function(f, delay) {
+    if (!f) return;
     $timeout(f, delay || 0);
     if ($timeout.flush) $timeout.flush();
   };
@@ -97,14 +98,14 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         audioSrc.loop = !!options.loop;
         audioSrc.onended = function() {
           self.stopped = true;
-          if (self.onEnd) deferredApply(self.onEnd);
+          deferredApply(self.onEnd);
         };
 
         if (audioSrc.start) audioSrc.start(0, playOffset);
         else if(audioSrc.noteOn) audioSrc.noteOn(0, playOffset);
         else console.error('AudioContextBuffer.start() not available');
 
-        if (self.onPlay) deferredApply(self.onPlay);
+        deferredApply(self.onPlay);
         playStartTime = audioCtx.currentTime;
       },
 
@@ -135,13 +136,11 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         // automatically called on creation so the user does not have an
         // opportunity to set an onBuffered event handler
         setTimeout(function() {
-          if (self.isCached()) {
-            if (self.onBuffered) deferredApply(self.onBuffered);
-          }
+          if (self.isCached()) deferredApply(self.onBuffered);
           else {
             if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
             eventHandlers[src].buffered.push(function() {
-              if (self.onBuffered) deferredApply(self.onBuffered);
+              deferredApply(self.onBuffered);
             });
           }
         }, 0);
@@ -201,7 +200,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         audioSrc.pause();
         if (!pause) {
           audioSrc.currentTime = 0;
-          if (self.onEnd) deferredApply(self.onEnd);
+          deferredApply(self.onEnd);
         }
       },
 
@@ -224,16 +223,16 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       self.audioSrc.currentTime = 0;
       if (!options.loop) {
         audioSrc.pause();
-        if (self.onEnd) deferredApply(self.onEnd);
+        deferredApply(self.onEnd);
       }
     });
     audioSrc.addEventListener('play', function() {
-      if (self.onPlay) deferredApply(self.onPlay);
+      deferredApply(self.onPlay);
     });
     audioSrc.addEventListener('canplaythrough', function handler() {
       audioSrc.removeEventListener('canplaythrough', handler);
       self.loaded = true;
-      if (self.onBuffered) deferredApply(self.onBuffered);
+      deferredApply(self.onBuffered);
     });
 
     return self;
