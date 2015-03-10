@@ -230,7 +230,8 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     audioSrc.addEventListener('play', function() {
       if (self.onPlay) deferredApply(self.onPlay);
     });
-    audioSrc.addEventListener('canplaythrough', function() {
+    audioSrc.addEventListener('canplaythrough', function handler() {
+      audioSrc.removeEventListener('canplaythrough', handler);
       self.loaded = true;
       if (self.onBuffered) deferredApply(self.onBuffered);
     });
