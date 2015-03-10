@@ -135,11 +135,14 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         // automatically called on creation so the user does not have an
         // opportunity to set an onBuffered event handler
         setTimeout(function() {
-          if (!self.onBuffered) return;
-          if (self.isCached()) deferredApply(self.onBuffered);
+          if (self.isCached()) {
+            if (self.onBuffered) deferredApply(self.onBuffered);
+          }
           else {
             if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
-            eventHandlers[src].buffered.push(self.onBuffered);
+            eventHandlers[src].buffered.push(function() {
+              if (self.onBuffered) deferredApply(self.onBuffered);
+            });
           }
         }, 0);
       },
