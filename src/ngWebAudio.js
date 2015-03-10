@@ -239,10 +239,13 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (!eventHandlers[src]) eventHandlers[src] = {};
 
     options = options || {};
+    if (options.buffer === undefined) options.buffer = true;
+    if (options.loop === undefined) options.loop = false;
     if (options.gain === undefined) options.gain = 1;
+    if (options.retryInterval === undefined) options.retryInterval = 1000;
 
     var audio = (audioCtx ? createWebAudio : createHTMLAudio)(src, options);
-    if (options.buffer !== false) audio.buffer();
+    if (options.buffer) audio.buffer();
     return audio;
   };
 }]);
