@@ -38,7 +38,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         // Fire onBuffered event
         var handlers = eventHandlers[src].buffered;
         if (handlers) {
-          // We can safely clean up all onBuffered handlers, as once the
+          // We can safely clean up all onBuffered event handlers, as once the
           // src media is cached, the onBuffered event can be fired immediately
           // for any new audio objects that are created henceforth
           eventHandlers[src].buffered = null;
@@ -133,7 +133,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         // onBuffered event
         // We need to wrap this in setTimeout() because buffer() can be
         // automatically called on creation so the user does not have an
-        // opportunity to set a onBuffer handler
+        // opportunity to set an onBuffered event handler
         setTimeout(function() {
           if (!self.onBuffered) return;
           if (self.isCached()) deferredApply(self.onBuffered);
