@@ -128,7 +128,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         self.stop(true);
       },
 
-      buffer: function() {
+      buffer: function buffer() {
+        if (buffer.called) return;
+        buffer.called = true;
+
         bufferAudio(src, options.retryInterval);
 
         // onBuffered event

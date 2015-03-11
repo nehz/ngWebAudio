@@ -179,6 +179,16 @@ function ngWebAudioTest(fallback) {
         wa_cached.onBuffered = function() { done(); };
       };
     });
+
+    it('should only fire once', function(done) {
+      var fired = false;
+      wa.buffer();
+      wa.onBuffered = function() {
+        expect(fired).toBe(false);
+        fired = true;
+        setTimeout(function() { done(); }, 1000);
+      };
+    });
   });
 }
 
