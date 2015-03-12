@@ -66,6 +66,8 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     var playStartTime = 0;  // Used to keep track how long clip is played for
     var playOffset = 0;  // Used to keep track of how far into clip we are
 
+    if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
+
     var self = {
       stopped: true,
       src: src,
@@ -79,13 +81,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         // Buffer audio if not buffered, and schedule play() for later
         if (!self.isCached()) {
           self.buffer();
-          (function retry() {
-            if (self.isCached() && !self.stopped) {
-              self.stopped = true;
-              play(src);
-            }
-            else setTimeout(retry, 200);
-          })();
+          eventHandlers[src].buffered.push(function() {
+            self.stopped = true;  // Need this to re-enter play()
+            play(src);
+          });
           return;
         }
 
@@ -141,7 +140,6 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         setTimeout(function() {
           if (self.isCached()) deferredApply(self.onBuffered);
           else {
-            if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
             eventHandlers[src].buffered.push(function() {
               deferredApply(self.onBuffered);
             });
@@ -166,13 +164,14 @@ var ngWebAudio = angular.module('ngWebAudio', [])
   // Create HTML Audio source (fallback)
   function createHTMLAudio(src, options) {
     var audioSrc = new Audio(src);
+    var loaded = false;
+    var onBuffered;
 
     var self = {
       audioSrc: audioSrc,
       stopped: true,
       src: src,
       options: options,
-      loaded: false,
       isWebAudio: false,
 
       play: function play() {
@@ -180,14 +179,11 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         self.stopped = false;
 
         // Wait for audio to be buffered
-        if (!self.loaded) {
-          (function retry() {
-            if (self.loaded && !self.stopped) {
-              self.stopped = true;
-              play(src);
-            }
-            else setTimeout(retry, 200);
-          })();
+        if (!loaded) {
+          onBuffered = function() {
+            self.stopped = true;  // Need this to re-enter play()
+            play(src);
+          };
           return;
         }
 
@@ -234,7 +230,8 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     });
     audioSrc.addEventListener('canplaythrough', function handler() {
       audioSrc.removeEventListener('canplaythrough', handler);
-      self.loaded = true;
+      loaded = true;
+      if (onBuffered) onBuffered();
       deferredApply(self.onBuffered);
     });
 
