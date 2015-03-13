@@ -23,7 +23,8 @@ Service: `WebAudio`
 
 ### API
 ```
-var audio = WebAudio(path_to_audio, [options]);
+var audio = WebAudio(path_to_audio, [options]);  // or
+var audio = new WebAudio(path_to_audio, [options]);
 
 // Automatically called on creation if options.buffer = true (default)
 // otherwise will be called when audio is first played

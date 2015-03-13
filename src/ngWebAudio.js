@@ -62,159 +62,155 @@ var ngWebAudio = angular.module('ngWebAudio', [])
   }
 
   // Create WebAudio source
-  function createWebAudio(src, options) {
+  function createWebAudio(self, src, options) {
     var playStartTime = 0;  // Used to keep track how long clip is played for
     var playOffset = 0;  // Used to keep track of how far into clip we are
 
     if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
 
-    var self = {
-      stopped: true,
-      src: src,
-      options: options,
-      isWebAudio: true,
+    self.stopped = true;
+    self.src = src;
+    self.options = options;
+    self.isWebAudio = true;
 
-      play: function play() {
-        if (!self.stopped) return;
-        self.stopped = false;
+    self.play = function play() {
+      if (!self.stopped) return;
+      self.stopped = false;
 
-        // Buffer audio if not buffered, and schedule play() for later
-        if (!self.isCached()) {
-          self.buffer();
-          eventHandlers[src].buffered.push(function() {
-            self.stopped = true;  // Need this to re-enter play()
-            play(src);
-          });
-          return;
-        }
-
-        var audioSrc = self.audioSrc = audioCtx.createBufferSource();
-        var gainNode = audioCtx.createGain();
-        gainNode.gain.value = options.gain;
-
-        audioSrc.buffer = audioBuffers[src];
-        audioSrc.connect(audioCtx.destination);
-        audioSrc.loop = !!options.loop;
-        audioSrc.onended = function() {
-          self.stopped = true;
-          deferredApply(self.onEnd);
-        };
-
-        if (audioSrc.start) audioSrc.start(0, playOffset);
-        else if(audioSrc.noteOn) audioSrc.noteOn(0, playOffset);
-        else console.error('AudioContextBuffer.start() not available');
-
-        deferredApply(self.onPlay);
-        playStartTime = audioCtx.currentTime;
-      },
-
-      stop: function(pause) {
-        if (self.stopped) return;
-        self.stopped = true;
-
-        if (!pause) playOffset = 0;
-        else playOffset += audioCtx.currentTime - playStartTime;
-
-        if (!pause && self.audioSrc.onended) self.audioSrc.onended();
-        self.audioSrc.onended = null;
-
-        if (self.audioSrc.stop) self.audioSrc.stop(0);
-        else if(self.audioSrc.noteOff) self.audioSrc.noteOff(0);
-        else console.error('AudioContextBuffer.stop() not available');
-      },
-
-      pause: function() {
-        self.stop(true);
-      },
-
-      buffer: function buffer() {
-        if (buffer.called) return;
-        buffer.called = true;
-
-        bufferAudio(src, options.retryInterval);
-
-        // onBuffered event
-        // We need to wrap this in setTimeout() because buffer() can be
-        // automatically called on creation so the user does not have an
-        // opportunity to set an onBuffered event handler
-        setTimeout(function() {
-          if (self.isCached()) deferredApply(self.onBuffered);
-          else {
-            eventHandlers[src].buffered.push(function() {
-              deferredApply(self.onBuffered);
-            });
-          }
-        }, 0);
-      },
-
-      offset: function() {
-        return self.stopped || !self.isCached() ?
-          playOffset :
-          playOffset + audioCtx.currentTime - playStartTime;
-      },
-
-      isCached: function() {
-        return audioBuffers[src] && audioBuffers[src] !== LOADING;
+      // Buffer audio if not buffered, and schedule play() for later
+      if (!self.isCached()) {
+        self.buffer();
+        eventHandlers[src].buffered.push(function() {
+          self.stopped = true;  // Need this to re-enter play()
+          play(src);
+        });
+        return;
       }
+
+      var audioSrc = self.audioSrc = audioCtx.createBufferSource();
+      var gainNode = audioCtx.createGain();
+      gainNode.gain.value = options.gain;
+
+      audioSrc.buffer = audioBuffers[src];
+      audioSrc.connect(audioCtx.destination);
+      audioSrc.loop = !!options.loop;
+      audioSrc.onended = function() {
+        self.stopped = true;
+        deferredApply(self.onEnd);
+      };
+
+      if (audioSrc.start) audioSrc.start(0, playOffset);
+      else if(audioSrc.noteOn) audioSrc.noteOn(0, playOffset);
+      else console.error('AudioContextBuffer.start() not available');
+
+      deferredApply(self.onPlay);
+      playStartTime = audioCtx.currentTime;
+    };
+
+    self.stop = function stop(pause) {
+      if (self.stopped) return;
+      self.stopped = true;
+
+      if (!pause) playOffset = 0;
+      else playOffset += audioCtx.currentTime - playStartTime;
+
+      if (!pause && self.audioSrc.onended) self.audioSrc.onended();
+      self.audioSrc.onended = null;
+
+      if (self.audioSrc.stop) self.audioSrc.stop(0);
+      else if(self.audioSrc.noteOff) self.audioSrc.noteOff(0);
+      else console.error('AudioContextBuffer.stop() not available');
+    };
+
+    self.pause = function pause() {
+      self.stop(true);
+    };
+
+    self.buffer= function buffer() {
+      if (buffer.called) return;
+      buffer.called = true;
+
+      bufferAudio(src, options.retryInterval);
+
+      // onBuffered event
+      // We need to wrap this in setTimeout() because buffer() can be
+      // automatically called on creation so the user does not have an
+      // opportunity to set an onBuffered event handler
+      setTimeout(function() {
+        if (self.isCached()) deferredApply(self.onBuffered);
+        else {
+          eventHandlers[src].buffered.push(function() {
+            deferredApply(self.onBuffered);
+          });
+        }
+      }, 0);
+    };
+
+    self.offset = function offset() {
+      return self.stopped || !self.isCached() ?
+        playOffset :
+        playOffset + audioCtx.currentTime - playStartTime;
+    };
+
+    self.isCached = function isCached() {
+      return audioBuffers[src] && audioBuffers[src] !== LOADING;
     };
 
     return self;
   }
 
   // Create HTML Audio source (fallback)
-  function createHTMLAudio(src, options) {
+  function createHTMLAudio(self, src, options) {
     var audioSrc = new Audio(src);
     var loaded = false;
     var onBuffered;
 
-    var self = {
-      audioSrc: audioSrc,
-      stopped: true,
-      src: src,
-      options: options,
-      isWebAudio: false,
+    self.audioSrc = audioSrc;
+    self.stopped = true;
+    self.src = src;
+    self.options = options;
+    self.isWebAudio = false;
 
-      play: function play() {
-        if (!self.stopped) return;
-        self.stopped = false;
+    self.play = function play() {
+      if (!self.stopped) return;
+      self.stopped = false;
 
-        // Wait for audio to be buffered
-        if (!loaded) {
-          onBuffered = function() {
-            self.stopped = true;  // Need this to re-enter play()
-            play(src);
-          };
-          return;
-        }
-
-        audioSrc.volume = options.gain;
-        audioSrc.loop = !!options.loop;
-        audioSrc.play();
-      },
-
-      stop: function(pause) {
-        if (self.stopped) return;
-        self.stopped = true;
-
-        audioSrc.pause();
-        if (!pause) {
-          audioSrc.currentTime = 0;
-          deferredApply(self.onEnd);
-        }
-      },
-
-      pause: function() {
-        self.stop(true);
-      },
-
-      buffer: function() {
-        audioSrc.load();
-      },
-
-      offset: function() {
-        return audioSrc.duration && audioSrc.currentTime <= audioSrc.duration ?
-          audioSrc.currentTime : 0;
+      // Wait for audio to be buffered
+      if (!loaded) {
+        onBuffered = function() {
+          self.stopped = true;  // Need this to re-enter play()
+          play(src);
+        };
+        return;
       }
+
+      audioSrc.volume = options.gain;
+      audioSrc.loop = !!options.loop;
+      audioSrc.play();
+    };
+
+    self.stop = function stop(pause) {
+      if (self.stopped) return;
+      self.stopped = true;
+
+      audioSrc.pause();
+      if (!pause) {
+        audioSrc.currentTime = 0;
+        deferredApply(self.onEnd);
+      }
+    };
+
+    self.pause = function pause() {
+      self.stop(true);
+    };
+
+    self.buffer = function buffer() {
+      audioSrc.load();
+    };
+
+    self.offset = function offset() {
+      return audioSrc.duration && audioSrc.currentTime <= audioSrc.duration ?
+        audioSrc.currentTime : 0;
     };
 
     audioSrc.addEventListener('ended', function() {
@@ -238,7 +234,8 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     return self;
   }
 
-  return function(src, options) {
+  return function WebAudio(src, options) {
+    if (!(this instanceof WebAudio)) return new WebAudio(src, options);
     if (!eventHandlers[src]) eventHandlers[src] = {};
 
     options = options || {};
@@ -247,8 +244,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (options.gain === undefined) options.gain = 1;
     if (options.retryInterval === undefined) options.retryInterval = 1000;
 
-    var audio = (audioCtx ? createWebAudio : createHTMLAudio)(src, options);
-    if (options.buffer) audio.buffer();
-    return audio;
+    (audioCtx ? createWebAudio : createHTMLAudio)(this, src, options);
+    if (options.buffer) this.buffer();
   };
 }]);
