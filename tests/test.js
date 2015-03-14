@@ -94,7 +94,7 @@ function ngWebAudioTest(fallback) {
 
       setTimeout(function () {
         wa.pause();
-        offset1 = wa.offset();
+        setTimeout(function() { offset1 = wa.offset(); }, 0);
       }, 1000);
 
       setTimeout(function () {
@@ -104,7 +104,7 @@ function ngWebAudioTest(fallback) {
 
       setTimeout(function () {
         wa.pause();
-        offset2 = wa.offset();
+        setTimeout(function() { offset2 = wa.offset(); }, 0);
       }, 3000);
 
       setTimeout(function () {
