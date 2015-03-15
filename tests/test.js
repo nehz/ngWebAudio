@@ -44,7 +44,6 @@ function ngWebAudioTest(fallback) {
     };
   });
 
-
   it('should loop audio', function(done) {
     wa.options.loop = true;
     wa.play();
@@ -127,12 +126,13 @@ function ngWebAudioTest(fallback) {
     expect(wa.offset()).toBe(0);
 
     wa.onPlay = function() {
+      function check() {
+        var offset;
+        expect(offset = wa.offset()).toBeGreaterThan(lastOffset);
+        lastOffset = offset;
+      }
       for (var i = 1; i < 10; i++) {
-        setTimeout(function () {
-          var offset;
-          expect(offset = wa.offset()).toBeGreaterThan(lastOffset);
-          lastOffset = offset;
-        }, 100 * i);
+        setTimeout(check, 100 * i);
       }
     };
 
