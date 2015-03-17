@@ -1,4 +1,4 @@
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 function ngWebAudioTest(fallback) {
   var WebAudio, wa;
