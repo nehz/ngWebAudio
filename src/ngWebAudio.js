@@ -116,17 +116,18 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     self.stop = function stop(pause) {
       if (pause) {
         if(!self.stopped) playOffset += audioCtx.currentTime - playStartTime;
-        self.stopped = true;
       }
       else {
-        self.stopped = true;
         playOffset = 0;
         deferredApply(self.onEnd);
       }
       self.audioSrc.onended = null;
-      if (self.audioSrc.stop) self.audioSrc.stop(0);
-      else if(self.audioSrc.noteOff) self.audioSrc.noteOff(0);
-      else console.error('AudioContextBuffer.stop() not available');
+      if (!self.stopped) {
+        if (self.audioSrc.stop) self.audioSrc.stop(0);
+        else if(self.audioSrc.noteOff) self.audioSrc.noteOff(0);
+        else console.error('AudioContextBuffer.stop() not available');
+      }
+      self.stopped = true;
     };
 
     self.pause = function pause() {
