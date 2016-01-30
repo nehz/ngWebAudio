@@ -101,6 +101,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       self.audioSrc.loop = !!options.loop;
       self.audioSrc.onended = function() {
         self.stopped = true;
+        playOffset = 0;
         deferredApply(self.onEnd);
       };
 
