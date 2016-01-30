@@ -132,7 +132,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       self.stop(true);
     };
 
-    self.buffer= function buffer() {
+    self.buffer = function buffer() {
       if (buffer.called) return;
       buffer.called = true;
 
