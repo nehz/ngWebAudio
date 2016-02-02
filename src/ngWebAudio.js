@@ -122,12 +122,12 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         playOffset = 0;
         deferredApply(self.onEnd);
       }
-      self.audioSrc.onended = null;
-      if (!self.stopped) {
+      if (!self.stopped && self.audioSrc.onended) {
         if (self.audioSrc.stop) self.audioSrc.stop(0);
         else if(self.audioSrc.noteOff) self.audioSrc.noteOff(0);
         else console.error('AudioContextBuffer.stop() not available');
       }
+      self.audioSrc.onended = null;
       self.stopped = true;
     };
 

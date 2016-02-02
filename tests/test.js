@@ -26,6 +26,10 @@ function ngWebAudioTest(fallback) {
     wa.stop();
     wa.pause();
     wa.play();
+    wa.stop();
+    wa.play();
+    wa.pause();
+    wa.play();
 
     wa.onPlay = function() {
       setTimeout(function() {
@@ -35,6 +39,7 @@ function ngWebAudioTest(fallback) {
     };
 
     wa.onEnd = function() {
+      wa.onEnd = null;
       expect(wa.offset()).toBe(0);
       expect(wa.stopped).toBe(true);
 
