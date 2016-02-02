@@ -23,6 +23,8 @@ function ngWebAudioTest(fallback) {
   });
 
   it('should play audio', function(done) {
+    wa.stop();
+    wa.pause();
     wa.play();
 
     wa.onPlay = function() {

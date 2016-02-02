@@ -114,6 +114,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     };
 
     self.stop = function stop(pause) {
+      if (!self.audioSrc) return;
       if (pause) {
         if(!self.stopped) playOffset += audioCtx.currentTime - playStartTime;
       }
@@ -200,6 +201,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     };
 
     self.stop = function stop(pause) {
+      if (!loaded) return;
       self.stopped = true;
       audioSrc.pause();
       if (!pause) {
