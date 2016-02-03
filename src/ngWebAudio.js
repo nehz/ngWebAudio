@@ -120,7 +120,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       }
       else {
         playOffset = 0;
-        deferredApply(self.onEnd);
+        deferredApply(self.onStop);
       }
       if (!self.stopped && self.audioSrc.onended) {
         if (self.audioSrc.stop) self.audioSrc.stop(0);
@@ -173,7 +173,6 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     var audioSrc = new Audio(src);
     var loaded = false;
     var onBuffered;
-    var onEndCalled = false;
 
     self.audioSrc = audioSrc;
     self.stopped = true;
@@ -196,7 +195,6 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
       audioSrc.volume = options.gain;
       audioSrc.loop = !!options.loop;
-      onEndCalled = false;
       audioSrc.play();
     };
 
@@ -206,8 +204,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       audioSrc.pause();
       if (!pause) {
         audioSrc.currentTime = 0;
-        if (!onEndCalled) deferredApply(self.onEnd);
-        onEndCalled = true;
+        deferredApply(self.onStop);
       }
     };
 

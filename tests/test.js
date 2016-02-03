@@ -57,14 +57,18 @@ function ngWebAudioTest(fallback) {
 
     wa.onPlay = function() {
       setTimeout(function() {
+        expect(wa.onStop).not.toHaveBeenCalled();
         expect(wa.onEnd).not.toHaveBeenCalled();
         wa.stop();
-        expect(wa.onEnd).toHaveBeenCalled();
+        expect(wa.onStop).toHaveBeenCalled();
+        expect(wa.onEnd).not.toHaveBeenCalled();
         done();
       }, 8000);
     };
 
+    wa.onStop = function() {};
     wa.onEnd = function() {};
+    spyOn(wa, 'onStop');
     spyOn(wa, 'onEnd');
   });
 
@@ -74,6 +78,7 @@ function ngWebAudioTest(fallback) {
     wa.onPlay = function() {
       setTimeout(function() {
         expect(wa.onEnd).not.toHaveBeenCalled();
+        expect(wa.onStop).not.toHaveBeenCalled();
         expect(wa.offset()).toBeGreaterThan(0);
         expect(wa.stopped).toBe(false);
         wa.pause();
@@ -83,13 +88,16 @@ function ngWebAudioTest(fallback) {
       }, 1000);
     };
 
-    wa.onEnd = function () {
+    wa.onStop = function () {
       setTimeout(function() {
+        expect(wa.onEnd).not.toHaveBeenCalled();
         done();
       }, 100);
     };
 
-    spyOn(wa, 'onEnd').and.callThrough();
+    wa.onEnd = function() {};
+    spyOn(wa, 'onStop').and.callThrough();
+    spyOn(wa, 'onEnd');
   });
 
   it('should pause audio', function(done) {

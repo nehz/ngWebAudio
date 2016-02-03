@@ -58,9 +58,10 @@ options = {
 
 ### Events
 ```
-audio.onPlay = function() { ... }       // When media first starts playing
-audio.onEnd = function() { ... }        // When media stops playing
-audio.onBuffered = function() { ... }   // When media is buffered
+audio.onPlay = function() { ... }      // When media starts playing
+audio.onStop = function() { ... }      // When media is stopped (with audio.stop())
+audio.onEnd = function() { ... }       // When media finishes playing completely (only if loop = false)
+audio.onBuffered = function() { ... }  // When media is buffered
 ```
 Callbacks are attached to the `audio` object that is returned.
 
