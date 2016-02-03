@@ -65,6 +65,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
   function createWebAudio(self, src, options) {
     var playStartTime = 0;  // Used to keep track how long clip is played for
     var playOffset = 0;  // Used to keep track of how far into clip we are
+    var duration = Infinity;  // Moddulo duration for when playback loops
 
     if (!eventHandlers[src].buffered) eventHandlers[src].buffered = [];
 
@@ -111,12 +112,16 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
       deferredApply(self.onPlay);
       playStartTime = audioCtx.currentTime;
+      duration = self.audioSrc.buffer.duration;
     };
 
     self.stop = function stop(pause) {
       if (!self.audioSrc) return;
       if (pause) {
-        if(!self.stopped) playOffset += audioCtx.currentTime - playStartTime;
+        if(!self.stopped) {
+          playOffset += audioCtx.currentTime - playStartTime;
+          playOffset %= duration;
+        }
       }
       else {
         playOffset = 0;
@@ -158,7 +163,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     self.offset = function offset() {
       return self.stopped || !self.isCached() ?
         playOffset :
-        playOffset + audioCtx.currentTime - playStartTime;
+        (playOffset + audioCtx.currentTime - playStartTime) % duration;
     };
 
     self.isCached = function isCached() {

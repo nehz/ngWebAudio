@@ -57,6 +57,7 @@ function ngWebAudioTest(fallback) {
 
     wa.onPlay = function() {
       setTimeout(function() {
+        expect(wa.offset()).toBeLessThan(5);
         expect(wa.onStop).not.toHaveBeenCalled();
         expect(wa.onEnd).not.toHaveBeenCalled();
         wa.stop();
