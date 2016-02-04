@@ -195,6 +195,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
           self.stopped = true;  // Need this to re-enter play()
           play(src);
         };
+        self.buffer();
         return;
       }
 
