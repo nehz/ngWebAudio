@@ -18,10 +18,11 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (!ngWebAudio.audioContext) ngWebAudio.audioContext = new AudioContext();
     var audioCtx = ngWebAudio.audioContext;
   }
+
   var audioBuffers = {}, eventHandlers = {};
 
   // Buffer audio via XHR
-  function bufferAudio(src, retryInterval) {
+  function bufferAudio(src, retryInterval, desiredSampleRate) {
     if (audioBuffers[src]) return;
     retryInterval = retryInterval || 1000;
     audioBuffers[src] = LOADING;
@@ -34,7 +35,21 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       if (req.status !== 200 && audioBuffers[src]) return req.onerror();
 
       audioCtx.decodeAudioData(req.response, function(buffer) {
-        audioBuffers[src] = buffer;
+     
+        // ios can have sample rate issues
+        if (/(iPhone|iPad)/i.test(navigator.userAgent) &&
+            buffer.sampleRate !== desiredSampleRate) {
+            console.log('offline context');
+          // create offline context to make sure ios uses correct sample rate
+          window.OfflineAudioContext = window.offlineAudioContext || window.webkitOfflineAudioContext;
+          var offlineCtx = new OfflineAudioContext(2, 1, 44100);
+          var source = offlineCtx.createBufferSource();
+          var myBuffer = buffer;
+          source.buffer = myBuffer;
+          audioBuffers[src] = source.buffer;
+        } else {
+          audioBuffers[src] = buffer;
+        }
 
         // Fire onBuffered event
         var handlers = eventHandlers[src].buffered;
@@ -55,7 +70,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     req.onerror = function() {
       console.error('Retrying ', src);
       audioBuffers[src] = null;
-      setTimeout(function() { bufferAudio(src, retryInterval); }, retryInterval);
+      setTimeout(function() { bufferAudio(src, retryInterval, desiredSampleRate); }, retryInterval);
     };
 
     req.send();
@@ -144,7 +159,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       if (buffer.called) return;
       buffer.called = true;
 
-      bufferAudio(src, options.retryInterval);
+      bufferAudio(src, options.retryInterval, options.desiredSampleRate);
 
       // onBuffered event
       // We need to wrap this in setTimeout() because buffer() can be
@@ -256,8 +271,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (options.loop === undefined) options.loop = false;
     if (options.gain === undefined) options.gain = 1;
     if (options.retryInterval === undefined) options.retryInterval = 1000;
+    if (options.desiredSampleRate === undefined) options.desiredSampleRate = 44100;
 
     (audioCtx ? createWebAudio : createHTMLAudio)(this, src, options);
     if (options.buffer) this.buffer();
   };
+
 }]);
