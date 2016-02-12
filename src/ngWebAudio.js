@@ -248,7 +248,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     return self;
   }
 
-  return function WebAudio(src, options) {
+  var WebAudio = function WebAudio(src, options) {
     if (!(this instanceof WebAudio)) return new WebAudio(src, options);
     if (!eventHandlers[src]) eventHandlers[src] = {};
 
@@ -261,4 +261,10 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     (audioCtx ? createWebAudio : createHTMLAudio)(this, src, options);
     if (options.buffer) this.buffer();
   };
+
+  WebAudio.setContext = function(newCtx) {
+    audioCtx = ngWebAudio.audioContext = newCtx;
+  };
+
+  return WebAudio;
 }]);
