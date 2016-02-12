@@ -3,17 +3,11 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 function ngWebAudioTest(fallback) {
   var WebAudio, wa;
 
-  beforeAll(function() {
-    if (fallback) {
-      window.AudioContext = null;
-      window.webkitAudioContext = null;
-    }
-  });
-
   beforeEach(module('ngWebAudio'));
   beforeEach(inject(function(_WebAudio_) {
     WebAudio = _WebAudio_;
-    wa = WebAudio('base/tests/test.mp3');
+    if (fallback) wa = WebAudio('base/tests/test.mp3', {fallback: true});
+    else wa = WebAudio('base/tests/test.mp3')
   }));
 
   it('test mode', function() {

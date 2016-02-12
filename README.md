@@ -52,6 +52,7 @@ options = {
   buffer = true,
   loop = false,
   gain = 1,
+  fallback = false,     // Use HTML5 audio fallback
   retryInterval = 1000  // Retry interval if buffering fails
 }
 ```

@@ -273,7 +273,8 @@ var ngWebAudio = angular.module('ngWebAudio', [])
     if (options.gain === undefined) options.gain = 1;
     if (options.retryInterval === undefined) options.retryInterval = 1000;
 
-    (audioCtx ? createWebAudio : createHTMLAudio)(this, src, options);
+    var ctor = audioCtx && !options.fallback ? createWebAudio : createHTMLAudio;
+    ctor(this, src, options);
     if (options.buffer) this.buffer();
   };
 
