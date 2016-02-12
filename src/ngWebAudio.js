@@ -15,7 +15,22 @@ var ngWebAudio = angular.module('ngWebAudio', [])
 
   var AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext) {
-    if (!ngWebAudio.audioContext) ngWebAudio.audioContext = new AudioContext();
+    if (!ngWebAudio.audioContext) {
+      // iOS sample rate fix
+      // Based on: https://github.com/Jam3/ios-safe-audio-context
+      var dummyCtx = new AudioContext();
+      var dummyBuffer = dummyCtx.createBuffer(1, 1, 44100);
+      var dummySrc = dummyCtx.createBufferSource();
+      dummySrc.buffer = dummyBuffer;
+      dummySrc.connect(dummyCtx.destination);
+      if (dummySrc.start) dummySrc.start(0);
+      else if(dummySrc.noteOn) dummySrc.noteOn(0);
+      else console.error('AudioContextBuffer.start() not available');
+      dummySrc.disconnect();
+      dummyCtx.close();
+
+      ngWebAudio.audioContext = new AudioContext();
+    }
     var audioCtx = ngWebAudio.audioContext;
   }
   var audioBuffers = {}, eventHandlers = {};
