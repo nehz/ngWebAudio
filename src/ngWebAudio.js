@@ -27,7 +27,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       else if(dummySrc.noteOn) dummySrc.noteOn(0);
       else console.error('AudioContextBuffer.start() not available');
       dummySrc.disconnect();
-      dummyCtx.close();
+      if (dummyCtx.close) dummyCtx.close();
 
       ngWebAudio.audioContext = new AudioContext();
     }
