@@ -1,10 +1,18 @@
 <!doctype html>
 <html>
-  <body ng-app="app" ng-controller="play">
+  <head>
+    <style>
+      [ng-cloak] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body ng-app="app" ng-controller="play" ng-cloak>
     <button ng-click="buffer()">Buffer</button>
     <button ng-click="play()">Play</button>
     <button ng-click="pause()">Pause</button>
     <button ng-click="stop()">Stop</button>
+    <span>Status: {{ audio.stopped ? 'Stopped' : 'Playing' }}</span>
 
     <script src="..\bower_components\angular\angular.js"></script>
     <script src="..\src\ngWebAudio.js"></script>
@@ -12,7 +20,7 @@
     <script>
       angular.module('app', ['ngWebAudio'])
         .controller('play', function($scope, WebAudio) {
-          var audio = WebAudio('../tests/test.mp3', {buffer: false});
+          var audio = $scope.audio = WebAudio('../tests/test.mp3', {buffer: false});
 
           $scope.buffer = function() {
             audio.buffer();

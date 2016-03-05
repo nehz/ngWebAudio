@@ -9,7 +9,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
   };
 }])
 
-.factory('WebAudio', ['deferredApply', function(deferredApply) {
+.factory('WebAudio', ['$rootScope', 'deferredApply', function($rootScope, deferredApply) {
   'use strict';
   var LOADING = 1;
 
@@ -119,6 +119,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         self.stopped = true;
         playOffset = 0;
         deferredApply(self.onEnd);
+        $rootScope.$apply();
       };
 
       if (self.audioSrc.start) self.audioSrc.start(0, playOffset);
@@ -249,6 +250,7 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         audioSrc.pause();
         deferredApply(self.onEnd);
       }
+      $rootScope.$apply();
     });
     audioSrc.addEventListener('play', function() {
       deferredApply(self.onPlay);
