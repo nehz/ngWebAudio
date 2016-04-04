@@ -96,10 +96,16 @@ var ngWebAudio = angular.module('ngWebAudio', [])
       // Create buffer early or iOS will mute audio (requires ui event trigger)
       if (!self.audioSrc || self.audioSrc.buffer) {
         self.audioSrc = audioCtx.createBufferSource();
-        self.gainNode = audioCtx.createGain();
-        self.gainNode.gain.value = 0;
-        self.audioSrc.connect(self.gainNode);
-        self.gainNode.connect(audioCtx.destination);
+        if (audioCtx.createGain) {
+          self.gainNode = audioCtx.createGain();
+          self.gainNode.gain.value = options.gain;
+          self.audioSrc.connect(self.gainNode);
+          self.gainNode.connect(audioCtx.destination);
+        }
+        else {
+          console.warn('AudioContext.createGain() not avaliable, option.gain will be ignored');
+          self.audioSrc.connect(audioCtx.destination);
+        }
       }
 
       // Buffer audio if not buffered, and schedule play() for later
@@ -112,7 +118,6 @@ var ngWebAudio = angular.module('ngWebAudio', [])
         return;
       }
 
-      self.gainNode.gain.value = options.gain;
       self.audioSrc.buffer = audioBuffers[src];
       self.audioSrc.loop = !!options.loop;
       self.audioSrc.onended = function() {
